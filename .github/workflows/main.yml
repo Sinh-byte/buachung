@@ -1,0 +1,46 @@
+name: Build Flutter APK
+
+on:
+  push:
+    branches:
+      - main  # Chạy khi có code mới push lên nhánh main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Bước 1: Lấy code từ repo về máy ảo
+      - uses: actions/checkout@v4
+
+      # Bước 2: Cài đặt Java (cần thiết cho Android)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Bước 3: Cài đặt Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x.x' # Hoặc để trống để dùng bản mới nhất
+          channel: 'stable'
+
+      # Bước 4: Tải các thư viện (dependencies)
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Bước 5: Build APK (Chế độ release)
+      - name: Build APK
+        run: flutter build apk --release
+
+      # Bước 6: Lưu trữ file APK sau khi build xong để bạn có thể tải về
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
